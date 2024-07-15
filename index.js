@@ -49,9 +49,10 @@ function updateDisplay() {
             <h3>${book.title}</h3>
             <h4>${book.author}</h4>
             <p>pages: ${book.pages}</p>
-            <p>reading: ${book.read ? "Yes" : "No"}</p>
             <button id='removeButton'>Remove</button>
-            <button id='changeStatusButton'>Read</button>
+            <button id='changeStatusButton'>${
+              book.read ? "Finished Reading" : "Not Read"
+            }</button>
         </div>
       `
     )
