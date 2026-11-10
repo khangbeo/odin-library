@@ -1,164 +1,298 @@
-/*
-  1. Use a more-intuitive box-sizing model.
-*/
+/* Minimal reset */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
-/*
-  2. Remove default margin
-*/
+
 * {
   margin: 0;
 }
-/*
-  Typographic tweaks!
-  3. Add accessible line-height
-  4. Improve text rendering
-*/
+
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --text: #111111;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #111111;
+  --accent-text: #ffffff;
+  --accent-hover: #333333;
+  --pill-read-bg: #dcfce7;
+  --pill-read-text: #166534;
+  --pill-unread-bg: #f3f4f6;
+  --pill-unread-text: #4b5563;
+  --danger-hover: #fef2f2;
+  --danger-text: #b91c1c;
+  --radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0a;
+    --surface: #171717;
+    --text: #f5f5f5;
+    --muted: #a3a3a3;
+    --border: #262626;
+    --accent: #f5f5f5;
+    --accent-text: #111111;
+    --accent-hover: #e5e5e5;
+    --pill-read-bg: #14532d;
+    --pill-read-text: #bbf7d0;
+    --pill-unread-bg: #262626;
+    --pill-unread-text: #d4d4d4;
+    --danger-hover: #450a0a;
+    --danger-text: #fca5a5;
+  }
+}
+
 body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--text);
 }
-/*
-  5. Improve media defaults
-*/
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 20px 64px;
 }
-/*
-  6. Remove built-in form typography styles
-*/
-input,
-button,
-textarea,
-select {
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.stats {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* Buttons */
+.btn {
   font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: none;
+  color: var(--text);
+  white-space: nowrap;
 }
-/*
-  7. Avoid text overflows
-*/
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  overflow-wrap: break-word;
+
+.btn:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
-/*
-  8. Create a root stacking context
-*/
-#root,
-#__next {
-  isolation: isolate;
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.btn-secondary:hover {
+  border-color: var(--muted);
+}
+
+.btn-ghost:hover {
+  background: var(--pill-unread-bg);
+}
+
+.btn-danger:hover {
+  background: var(--danger-hover);
+  color: var(--danger-text);
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 24px;
+  padding: 10px 16px;
+}
+
+.btn-close {
+  padding: 4px 10px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+/* Book grid + cards */
+.books {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
 }
 
 .card {
-  margin: 10px;
-  border: 1px solid #ccc;
-  width: 200px;
-  padding: 10px;
-}
-
-/* General body styles */
-body {
-  font-family: "Arial", sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-  background-color: #f4f4f4;
-}
-
-h1 {
-  text-align: center;
-}
-
-.books {
-  display: flex;
-  flex-direction: row;
-}
-
-/* Styling the form container */
-#bookForm {
-  background-color: white;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 20px;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-dialog {
-  margin: auto;
-  border-style: none;
+.card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: break-word;
 }
 
-dialog > button {
-  background-color: red;
+.card .author {
+  color: var(--muted);
+  font-size: 14px;
+  overflow-wrap: break-word;
 }
 
-dialog > button:hover {
-  background-color: rgb(156, 0, 0);
+.card .pages {
+  color: var(--muted);
+  font-size: 13px;
 }
 
-/* Styling form headers */
-#bookForm h2 {
+.pill {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 999px;
+  margin: 6px 0 10px;
+}
+
+.pill-read {
+  background: var(--pill-read-bg);
+  color: var(--pill-read-text);
+}
+
+.pill-unread {
+  background: var(--pill-unread-bg);
+  color: var(--pill-unread-text);
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.card-actions .btn {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.empty {
+  color: var(--muted);
   text-align: center;
-  color: #333;
+  padding: 64px 20px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
 }
 
-/* Label styling */
+/* Dialog + form */
+dialog {
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  width: calc(100% - 40px);
+  max-width: 420px;
+  margin: auto;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+#bookForm {
+  padding: 24px;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dialog-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
 label {
   display: block;
-  margin-top: 20px;
-  margin-bottom: 5px;
-  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 16px;
+  margin-bottom: 6px;
 }
 
-/* Input fields styling */
 input[type="text"],
-input[type="number"],
-input[type="checkbox"] {
+input[type="number"] {
+  font: inherit;
   width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
 }
 
-/* Special styling for checkbox */
-input[type="checkbox"] {
-  width: auto; /* Override full-width for checkbox */
-  margin-top: 0; /* Align checkbox better with its label */
+input[type="text"]::placeholder,
+input[type="number"]::placeholder {
+  color: var(--muted);
 }
 
-/* Button styling */
-button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 20px;
-  background-color: #5c67f2;
-  color: white;
-  border: none;
-  border-radius: 4px;
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
   cursor: pointer;
-  font-size: 16px;
 }
 
-button:hover {
-  background-color: #5058cc;
+.checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
 }
 
-::backdrop {
-  background-image: lightgray;
-  opacity: 0.75;
+@media (max-width: 480px) {
+  .container {
+    padding-top: 32px;
+  }
+
+  .books {
+    grid-template-columns: 1fr;
+  }
 }

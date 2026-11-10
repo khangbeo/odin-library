@@ -1,84 +1,142 @@
-const dialog = document.querySelector("dialog");
-const showButton = document.querySelector("dialog + button");
-const closeButton = document.querySelector("dialog button");
-const books = document.querySelector("#books");
+const dialog = document.querySelector("#bookDialog");
+const showButton = document.querySelector("#addBook");
+const closeButton = document.querySelector("#closeDialog");
+const booksEl = document.querySelector("#books");
+const emptyState = document.querySelector("#emptyState");
+const statsEl = document.querySelector("#stats");
 const bookForm = document.querySelector("#bookForm");
 
-let myLibrary = [
-  {
-    title: "Poop",
-    author: "Birb",
-    pages: 12,
-    read: true,
-  },
-  {
-    title: "Shoot",
-    author: "Borb",
-    pages: 25,
-    read: false,
-  },
+const STORAGE_KEY = "odin-library";
+
+class Book {
+  constructor(title, author, pages, read) {
+    this.title = title;
+    this.author = author;
+    this.pages = pages;
+    this.read = read;
+  }
+
+  info() {
+    return `${this.title} by ${this.author}, ${this.pages} pages, read: ${this.read}`;
+  }
+}
+
+const starterBooks = [
+  new Book("The Hobbit", "J.R.R. Tolkien", 310, true),
+  new Book("Dune", "Frank Herbert", 412, false),
 ];
 
-function Book(title, author, pages, read) {
-  this.title = title;
-  this.author = author;
-  this.pages = pages;
-  this.read = read;
-  this.info = function () {
-    return `${title} by ${author}, ${pages} pages, read: ${read}`;
-  };
+function loadLibrary() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (Array.isArray(saved)) {
+      return saved.map(
+        (b) => new Book(b.title, b.author, Number(b.pages) || 0, Boolean(b.read))
+      );
+    }
+  } catch {
+    // Corrupted storage: fall through to starter books.
+  }
+  return [...starterBooks];
+}
+
+let myLibrary = loadLibrary();
+
+function saveLibrary() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(myLibrary));
 }
 
 function addBookToLibrary() {
-  const title = bookForm.elements["title"].value;
-  const author = bookForm.elements["author"].value;
-  const pages = bookForm.elements["pages"].value;
-  const read = bookForm.elements["read"].checked; // 'checked' returns true/false
+  const title = bookForm.elements["title"].value.trim();
+  const author = bookForm.elements["author"].value.trim();
+  const pages = Number(bookForm.elements["pages"].value);
+  const read = bookForm.elements["read"].checked;
 
-  const newBook = new Book(title, author, pages, read);
-  myLibrary.push(newBook);
+  if (!title || !author || !pages) return;
+
+  myLibrary.push(new Book(title, author, pages, read));
+  saveLibrary();
+  updateDisplay();
+}
+
+function removeBook(index) {
+  myLibrary = myLibrary.filter((_, i) => i !== index);
+  saveLibrary();
+  updateDisplay();
+}
+
+function updateStatus(index) {
+  const book = myLibrary[index];
+  if (!book) return;
+  book.read = !book.read;
+  saveLibrary();
   updateDisplay();
 }
 
 function updateDisplay() {
-  const books = document.getElementById("books");
-  books.innerHTML = myLibrary
-    .map(
-      (book, index) => `
-        <div class='card' data-index=${index}>
-            <h3>${book.title}</h3>
-            <h4>${book.author}</h4>
-            <p>pages: ${book.pages}</p>
-            <button id='removeButton'>Remove</button>
-            <button id='changeStatusButton'>${
-              book.read ? "Finished Reading" : "Not Read"
-            }</button>
-        </div>
-      `
-    )
-    .join("");
+  const readCount = myLibrary.filter((b) => b.read).length;
+  statsEl.textContent =
+    myLibrary.length === 0
+      ? "0 books"
+      : `${myLibrary.length} ${myLibrary.length === 1 ? "book" : "books"} · ${readCount} read`;
+
+  emptyState.hidden = myLibrary.length !== 0;
+  booksEl.innerHTML = "";
+
+  myLibrary.forEach((book, index) => {
+    const card = document.createElement("article");
+    card.className = "card";
+
+    const title = document.createElement("h3");
+    title.textContent = book.title;
+
+    const author = document.createElement("p");
+    author.className = "author";
+    author.textContent = book.author;
+
+    const pages = document.createElement("p");
+    pages.className = "pages";
+    pages.textContent = `${book.pages} pages`;
+
+    const pill = document.createElement("span");
+    pill.className = `pill ${book.read ? "pill-read" : "pill-unread"}`;
+    pill.textContent = book.read ? "Read" : "Not read";
+
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "btn btn-secondary";
+    toggle.dataset.action = "toggle";
+    toggle.dataset.index = index;
+    toggle.textContent = book.read ? "Mark unread" : "Mark read";
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "btn btn-ghost btn-danger";
+    remove.dataset.action = "remove";
+    remove.dataset.index = index;
+    remove.textContent = "Remove";
+
+    actions.append(toggle, remove);
+    card.append(title, author, pages, pill, actions);
+    booksEl.append(card);
+  });
 }
 
-function removeBook(bookIndex) {
-  const updatedLibrary = myLibrary.filter((book, index) => bookIndex !== index);
-  myLibrary = updatedLibrary;
-  updateDisplay();
-}
-
-function updateStatus(bookIndex) {
-  const foundBook = myLibrary.find((book, index) => index === bookIndex);
-  foundBook.read = !foundBook.read;
-  updateDisplay();
-}
-
-// "Show the dialog" button opens the dialog modally
 showButton.addEventListener("click", () => {
   dialog.showModal();
+  bookForm.elements["title"].focus();
 });
 
-// "Close" button closes the dialog
 closeButton.addEventListener("click", () => {
   dialog.close();
+});
+
+// Close when clicking the dimmed backdrop outside the form.
+dialog.addEventListener("click", (e) => {
+  if (e.target === dialog) dialog.close();
 });
 
 bookForm.addEventListener("submit", (e) => {
@@ -88,22 +146,13 @@ bookForm.addEventListener("submit", (e) => {
   bookForm.reset();
 });
 
-books.addEventListener("click", (e) => {
-  if (e.target.tagName === "BUTTON") {
-    const buttonId = e.target.id;
-    const buttonParent = e.target.parentElement;
+booksEl.addEventListener("click", (e) => {
+  const button = e.target.closest("button[data-action]");
+  if (!button) return;
 
-    const index = parseInt(buttonParent.dataset.index, 10);
-    if (buttonId === "removeButton") {
-      removeBook(index);
-    }
-
-    if (buttonId === "changeStatusButton") {
-      updateStatus(index);
-    }
-  }
+  const index = Number(button.dataset.index);
+  if (button.dataset.action === "remove") removeBook(index);
+  if (button.dataset.action === "toggle") updateStatus(index);
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-  updateDisplay();
-});
+updateDisplay();
